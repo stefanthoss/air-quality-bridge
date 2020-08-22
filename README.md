@@ -9,7 +9,7 @@ The luftdaten.info sensor already supports writing to InfluxDB directly but that
 This project uses Python 3. Install required dependencies with
 
 ```shell
-pip install Flask Flask-InfluxDB
+pip install -r requirements.txt
 ```
 
 ## Configuration
