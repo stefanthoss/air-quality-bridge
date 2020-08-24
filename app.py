@@ -25,7 +25,7 @@ def post():
     data_points = transform_data(data["sensordatavalues"])
     app.logger.debug(f"Writing data: {data_points}")
     influx_db.write_points(
-        [{"fields": data_points, "tags": {"node": f"esp8266-{data['esp8266id']}"}, "measurement": "feinstaub",}]
+        [{"fields": data_points, "tags": {"node": f"esp8266-{data['esp8266id']}"}, "measurement": "feinstaub"}]
     )
 
     return jsonify({"success": "true"})
