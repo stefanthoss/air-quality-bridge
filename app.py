@@ -5,7 +5,7 @@ from flask_influxdb import InfluxDB
 import aqi
 
 AQI_CATEGORIES = {
-    (0, 50): "Good",
+    (-1, 50): "Good",
     (50, 100): "Moderate",
     (100, 150): "Unhealthy for Sensitive Groups",
     (150, 200): "Unhealthy",
@@ -45,8 +45,8 @@ def post():
     aqi_value = float(
         aqi.to_aqi(
             [
-                (aqi.POLLUTANT_PM25, data_points["SDS_P2"]),
                 (aqi.POLLUTANT_PM10, data_points["SDS_P1"]),
+                (aqi.POLLUTANT_PM25, data_points["SDS_P2"]),
             ]
         )
     )
