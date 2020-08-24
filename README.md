@@ -23,3 +23,7 @@ Launch the app:
 ```shell
 FLASK_APP=app.py FLASK_ENV=development flask run --host=0.0.0.0 --cert=adhoc --port 5443
 ```
+
+## Credits
+
+* Using [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi) to convert PM concentration to AQI

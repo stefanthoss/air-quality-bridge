@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_influxdb import InfluxDB
+import aqi
 
 app = Flask(__name__)
 app.config.from_pyfile("app.cfg")
