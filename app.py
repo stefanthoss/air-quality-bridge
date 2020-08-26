@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 from flask_influxdb import InfluxDB
 import aqi
 
+
 AQI_CATEGORIES = {
     (-1, 50): "Good",
     (50, 100): "Moderate",
@@ -43,12 +44,7 @@ def post():
     data_points = transform_data(data["sensordatavalues"])
 
     aqi_value = float(
-        aqi.to_aqi(
-            [
-                (aqi.POLLUTANT_PM10, data_points["SDS_P1"]),
-                (aqi.POLLUTANT_PM25, data_points["SDS_P2"]),
-            ]
-        )
+        aqi.to_aqi([(aqi.POLLUTANT_PM10, data_points["SDS_P1"]), (aqi.POLLUTANT_PM25, data_points["SDS_P2"])])
     )
     data_points["AQI_value"] = aqi_value
     data_points["AQI_category"] = get_aqi_category(aqi_value)
