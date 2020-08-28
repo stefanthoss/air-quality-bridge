@@ -1,6 +1,6 @@
-# Luftdaten InfluxDB Bridge
+# Air Quality -> InfluxDB Bridge
 
-This Flask-based server accepts particulate matter/temperature/humidity data from a [sensor.community sensor](https://sensor.community/en/sensors/airrohr) and writes it to a InfluxDB instance. It also calculates the AQI based on the particulate matter concentration with [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi).
+This Flask-based server accepts particulate matter/temperature/humidity data from a [sensor.community sensor](https://sensor.community/en/sensors/airrohr) and writes it to a InfluxDB instance. It also calculates the Air Quality Index (AQI) with [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi).
 
 ## Requirements
 
