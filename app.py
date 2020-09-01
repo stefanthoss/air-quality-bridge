@@ -21,6 +21,12 @@ influx_db = InfluxDB(app=app)
 MEASUREMENT_NAME = "feinstaub"
 
 
+def get_aqi_category(aqi_value):
+    for limits, category in AQI_CATEGORIES.items():
+        if aqi_value > limits[0] and aqi_value <= limits[1]:
+            return category
+
+
 def transform_data(data):
     data_points = {}
     for dp in data:
@@ -28,10 +34,13 @@ def transform_data(data):
     return data_points
 
 
-def get_aqi_category(aqi_value):
-    for limits, category in AQI_CATEGORIES.items():
-        if aqi_value > limits[0] and aqi_value <= limits[1]:
-            return category
+def trigger_alerts():
+    result = influx_db.query(f"SELECT AQI_category FROM {MEASUREMENT_NAME} WHERE time > now() - 15m;")
+    app.logger.debug(f"Result: {result}")
+    categories = [i["AQI_category"] for i in result.get_points(measurement=MEASUREMENT_NAME)]
+    app.logger.debug(f"Categories: {categories}")
+    if len(set(categories)) == 1:
+        app.logger.debug(f"We're in one category: {categories[0]}")
 
 
 @app.route("/", methods=["GET"])
@@ -59,6 +68,8 @@ def upload_measurement():
 
     app.logger.debug(f"Writing data: {data_points}")
     influx_db.write_points([{"fields": data_points, "tags": {"node": node_tag}, "measurement": MEASUREMENT_NAME}])
+
+    trigger_alerts()
 
     return jsonify({"success": "true"})
 
