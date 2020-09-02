@@ -14,6 +14,15 @@ AQI_CATEGORIES = {
     (300, 500): "Hazardous",
 }
 
+ALERT_MESSAGES = {
+    "Good": "\U0001F7E2 The air quality is good, go outside!",
+    "Moderate": "\U0001F7E1 The air quality is moderate.",
+    "Unhealthy for Sensitive Groups": "\U0001F7E0 The air quality is unhealthy for sensitive groups.",
+    "Unhealthy": "\U0001F534 The air quality is unhealthy.",
+    "Very Unhealthy": "\U0001F7E3 The air quality is very unhealthy.",
+    "Hazardous": "\U0001F7E4 The air quality is hazardous.",
+}
+
 app = Flask(__name__)
 app.config.from_pyfile("app.cfg")
 influx_db = InfluxDB(app=app)
@@ -36,11 +45,19 @@ def transform_data(data):
 
 def trigger_alerts():
     result = influx_db.query(f"SELECT AQI_category FROM {MEASUREMENT_NAME} WHERE time > now() - 15m;")
-    app.logger.debug(f"Result: {result}")
     categories = [i["AQI_category"] for i in result.get_points(measurement=MEASUREMENT_NAME)]
-    app.logger.debug(f"Categories: {categories}")
-    if len(set(categories)) == 1:
-        app.logger.debug(f"We're in one category: {categories[0]}")
+    current_category = categories[0]
+
+    result = influx_db.query("SELECT last(alert) FROM notifications;")
+    notifications = list(result.get_points(measurement="notifications"))
+    if len(notifications) == 0:
+        last_category = "Good"
+    else:
+        last_category = notifications[0]["last"]
+
+    if len(set(categories)) == 1 and current_category != last_category:
+        app.logger.info(f"New status: {current_category}")
+        influx_db.write_points([{"fields": {"alert": current_category}, "measurement": "notifications"}])
 
 
 @app.route("/", methods=["GET"])
