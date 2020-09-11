@@ -22,6 +22,55 @@ Launch the app locally in development mode:
 FLASK_APP=app.py FLASK_ENV=development flask run --host=0.0.0.0 --cert=adhoc --port 5443
 ```
 
+## Sample Payload
+
+From the sensor firmware version `NRZ-2020-129`:
+
+```json
+{
+    "esp8266id": "9372054",
+    "software_version": "NRZ-2020-129",
+    "sensordatavalues": [
+        {
+            "value_type": "SDS_P1",
+            "value": "18.83"
+        },
+        {
+            "value_type": "SDS_P2",
+            "value": "10.60"
+        },
+        {
+            "value_type": "BME280_temperature",
+            "value": "17.00"
+        },
+        {
+            "value_type": "BME280_pressure",
+            "value": "101001.28"
+        },
+        {
+            "value_type": "BME280_humidity",
+            "value": "66.66"
+        },
+        {
+            "value_type": "samples",
+            "value": "4314326"
+        },
+        {
+            "value_type": "min_micro",
+            "value": "33"
+        },
+        {
+            "value_type": "max_micro",
+            "value": "20201"
+        },
+        {
+            "value_type": "signal",
+            "value": "-46"
+        }
+    ]
+}
+```
+
 ## Sensor Configuration
 
 In the *Configuration* section of your sensor:
