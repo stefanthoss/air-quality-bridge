@@ -2,7 +2,10 @@
 
 from flask import Flask, jsonify, request
 from flask_influxdb import InfluxDB
+from threema.gateway import Connection
+from threema.gateway.simple import TextMessage
 import aqi
+import asyncio
 
 
 AQI_CATEGORIES = {
@@ -28,6 +31,9 @@ app.config.from_pyfile("app.cfg")
 influx_db = InfluxDB(app=app)
 
 MEASUREMENT_NAME = "feinstaub"
+THREEMA_IDENTITY = "*ABCDEFG"
+THREEMA_RECIPIENTS = ["HIJKLMN", "OPQRSTU"]
+THREEMA_SECRET = "SECRET"
 
 
 def get_aqi_category(aqi_value):
@@ -56,8 +62,17 @@ def trigger_alerts():
         last_category = notifications[0]["last"]
 
     if len(set(categories)) == 1 and current_category != last_category:
-        app.logger.info(f"New status: {current_category}")
         influx_db.write_points([{"fields": {"alert": current_category}, "measurement": "notifications"}])
+        app.logger.info(f"New alert status: {current_category}")
+
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        threema_connection = Connection(
+            identity=THREEMA_IDENTITY, secret=THREEMA_SECRET, verify_fingerprint=True, blocking=True
+        )
+        for recipient in THREEMA_RECIPIENTS:
+            message = TextMessage(connection=threema_connection, to_id=recipient, text=ALERT_MESSAGES[current_category])
+            message.send()
+        threema_connection.close()
 
 
 @app.route("/", methods=["GET"])
