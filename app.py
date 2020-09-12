@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from distutils import util
 from flask import Flask, jsonify, request
 from flask_influxdb import InfluxDB
 from threema.gateway import Connection
@@ -30,10 +31,7 @@ app = Flask(__name__)
 app.config.from_pyfile("app.cfg")
 influx_db = InfluxDB(app=app)
 
-MEASUREMENT_NAME = "feinstaub"
-THREEMA_IDENTITY = "*ABCDEFG"
-THREEMA_RECIPIENTS = ["HIJKLMN", "OPQRSTU"]
-THREEMA_SECRET = "SECRET"
+ALERT_THRESHOLD_MINUTES = 30
 
 
 def get_aqi_category(aqi_value):
@@ -50,8 +48,10 @@ def transform_data(data):
 
 
 def trigger_alerts():
-    result = influx_db.query(f"SELECT AQI_category FROM {MEASUREMENT_NAME} WHERE time > now() - 15m;")
-    categories = [i["AQI_category"] for i in result.get_points(measurement=MEASUREMENT_NAME)]
+    result = influx_db.query(
+        f"SELECT AQI_category FROM {app.config['INFLUXDB_MEASUREMENT_NAME']} WHERE time > now() - {ALERT_THRESHOLD_MINUTES}m;"
+    )
+    categories = [i["AQI_category"] for i in result.get_points(measurement=app.config["INFLUXDB_MEASUREMENT_NAME"])]
     current_category = categories[0]
 
     result = influx_db.query("SELECT last(alert) FROM notifications;")
@@ -65,14 +65,20 @@ def trigger_alerts():
         influx_db.write_points([{"fields": {"alert": current_category}, "measurement": "notifications"}])
         app.logger.info(f"New alert status: {current_category}")
 
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        threema_connection = Connection(
-            identity=THREEMA_IDENTITY, secret=THREEMA_SECRET, verify_fingerprint=True, blocking=True
-        )
-        for recipient in THREEMA_RECIPIENTS:
-            message = TextMessage(connection=threema_connection, to_id=recipient, text=ALERT_MESSAGES[current_category])
-            message.send()
-        threema_connection.close()
+        if bool(util.strtobool(app.config["THREEMA_ALERTS_ENABLED"])):
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            threema_connection = Connection(
+                identity=app.config["THREEMA_IDENTITY"],
+                secret=app.config["THREEMA_SECRET"],
+                verify_fingerprint=True,
+                blocking=True,
+            )
+            for recipient in app.config["THREEMA_RECIPIENTS"].split(","):
+                message = TextMessage(
+                    connection=threema_connection, to_id=recipient, text=ALERT_MESSAGES[current_category]
+                )
+                message.send()
+            threema_connection.close()
 
 
 @app.route("/", methods=["GET"])
@@ -99,7 +105,9 @@ def upload_measurement():
     data_points["AQI_category"] = get_aqi_category(aqi_value)
 
     app.logger.debug(f"Writing data: {data_points}")
-    influx_db.write_points([{"fields": data_points, "tags": {"node": node_tag}, "measurement": MEASUREMENT_NAME}])
+    influx_db.write_points(
+        [{"fields": data_points, "tags": {"node": node_tag}, "measurement": app.config["INFLUXDB_MEASUREMENT_NAME"]}]
+    )
 
     trigger_alerts()
 
