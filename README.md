@@ -4,7 +4,13 @@ This Flask-based server accepts particulate matter/temperature/humidity data fro
 
 ## Requirements
 
-This project uses Python 3. Install required dependencies with
+You will need Python 3, libsodium, and libffi. On Debian, you can install those with
+
+```shell
+sudo apt update && sudo apt install libffi-dev libsodium23 python3 python3-dev python3-flask python3-pip
+```
+
+Install the required Python dependencies with pip:
 
 ```shell
 pip install -r requirements.txt
