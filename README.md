@@ -12,14 +12,14 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Change the values in `app.cfg` to point to your InfluxDB instance.
+Change the values in `main.cfg` to point to your InfluxDB instance.
 
 ## Development
 
-Launch the app locally in development mode:
+Launch the app locally in development mode and access it at <http://127.0.0.1:5000>:
 
 ```shell
-FLASK_APP=app.py FLASK_ENV=development flask run --host=0.0.0.0 --cert=adhoc --port 5443
+FLASK_APP=main.py FLASK_ENV=development flask run
 ```
 
 ## Sample Payload

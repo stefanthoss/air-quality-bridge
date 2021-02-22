@@ -15,7 +15,7 @@ AQI_CATEGORIES = {
 }
 
 app = Flask(__name__)
-app.config.from_pyfile("app.cfg")
+app.config.from_pyfile("main.cfg")
 influx_db = InfluxDB(app=app)
 
 MEASUREMENT_NAME = "feinstaub"
