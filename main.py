@@ -15,7 +15,7 @@ AQI_CATEGORIES = {
 }
 
 app = Flask(__name__)
-app.config.from_pyfile("main.cfg")
+app.config.from_envvar('APP_SETTINGS')
 influx_db = InfluxDB(app=app)
 
 MEASUREMENT_NAME = "feinstaub"
@@ -34,7 +34,7 @@ def get_aqi_category(aqi_value):
             return category
 
 
-@app.route("/", methods=["GET"])
+@app.route("/info", methods=["GET"])
 def root():
     return jsonify({"name": app.name})
 

@@ -19,7 +19,7 @@ Change the values in `main.cfg` to point to your InfluxDB instance.
 Launch the app locally in development mode and access it at <http://127.0.0.1:5000>:
 
 ```shell
-FLASK_APP=main.py FLASK_ENV=development flask run
+FLASK_APP=main.py FLASK_ENV=development APP_SETTINGS=main.cfg flask run
 ```
 
 ## Sample Payload
