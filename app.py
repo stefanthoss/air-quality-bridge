@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 from flask import Flask, jsonify, request
-from flask_influxdb import InfluxDB
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
 import aqi
 
 
@@ -16,9 +17,15 @@ AQI_CATEGORIES = {
 
 app = Flask(__name__)
 app.config.from_pyfile("app.cfg")
-influx_db = InfluxDB(app=app)
 
-MEASUREMENT_NAME = "feinstaub"
+INFLUXDB_URL = "https://localhost:8086"
+INFLUXDB_TOKEN = "my-token"
+INFLUXDB_ORG = "my-org"
+INFLUXDB_BUCKET = "my-bucket"
+INFLUXDB_MEASUREMENT = "feinstaub"
+
+client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, verify_ssl=False)
+write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
 def transform_data(data):
@@ -58,7 +65,7 @@ def upload_measurement():
     data_points["AQI_category"] = get_aqi_category(aqi_value)
 
     app.logger.debug(f"Writing data: {data_points}")
-    influx_db.write_points([{"fields": data_points, "tags": {"node": node_tag}, "measurement": MEASUREMENT_NAME}])
+    write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, [{"measurement": INFLUXDB_MEASUREMENT, "tags": {"node": node_tag}, "fields": data_points}])
 
     return jsonify({"success": "true"})
 
