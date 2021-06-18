@@ -34,8 +34,16 @@ If everything is configured correctly, executing `curl -X GET http://localhost:5
 
 ## Deployment
 
+Build the Docker image:
+
 ```shell
 docker build -t air-quality-influxdb-bridge:devel .
+```
+
+Change the environment variables in `docker-compose.yml` and start the Docker service:
+
+```shell
+docker-compose up
 ```
 
 ## Sample Payload
