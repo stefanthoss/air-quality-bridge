@@ -18,8 +18,10 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v3
         env:
+          VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINTER_RULES_PATH: /
           PYTHON_BLACK_CONFIG_FILE: "pyproject.toml"
           PYTHON_FLAKE8_CONFIG_FILE: "pyproject.toml"
           VALIDATE_DOCKERFILE: true
