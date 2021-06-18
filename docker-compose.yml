@@ -12,3 +12,5 @@ services:
       - INFLUXDB_V2_VERIFY_SSL=False
       - INFLUXDB_BUCKET=my-bucket
       - INFLUXDB_MEASUREMENT=feinstaub
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/info"]
