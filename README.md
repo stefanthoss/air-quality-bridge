@@ -22,6 +22,14 @@ Launch the app locally in development mode and access it at <http://127.0.0.1:50
 FLASK_APP=main.py FLASK_ENV=development APP_SETTINGS=main.cfg flask run
 ```
 
+## Deployment
+
+Create a `prod.cfg` file.
+
+```shell
+docker build -t air-quality-influxdb-bridge:devel .
+
+
 ## Sample Payload
 
 From the sensor firmware version `NRZ-2020-129`:
