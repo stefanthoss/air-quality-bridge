@@ -18,7 +18,7 @@ Use `INFLUXDB_BUCKET` to configure the bucket (`db0` by default) and `INFLUXDB_M
 
 ## Development
 
-Launch the app locally in development mode and access it at <http://127.0.0.1:5000>:
+Launch the app locally in development mode and access it at <http://localhost:5000>:
 
 ```shell
 export INFLUXDB_V2_URL="https://localhost:8086"
@@ -27,16 +27,16 @@ export INFLUXDB_V2_ORG="my-org"
 export INFLUXDB_V2_VERIFY_SSL="False"
 export INFLUXDB_BUCKET="my-bucket"
 export INFLUXDB_MEASUREMENT="feinstaub"
-FLASK_APP=main.py FLASK_ENV=development flask run --host=0.0.0.0 --cert=adhoc --port 5443
+python main.py
 ```
+
+If everything is configured correctly, executing `curl -X GET http://localhost:5000/info` should return a JSON object that indicates the InfluxDB client is ready.
 
 ## Deployment
 
-Create a `prod.cfg` file.
-
 ```shell
 docker build -t air-quality-influxdb-bridge:devel .
-
+```
 
 ## Sample Payload
 
