@@ -38,7 +38,7 @@ def get_aqi_category(aqi_value):
             return category
 
 
-@app.route("/", methods=["GET"])
+@app.route("/info", methods=["GET"])
 def root():
     return jsonify({"app_name": app.name, "influxdb_client": client.ready().status})
 
@@ -71,4 +71,4 @@ def upload_measurement():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
