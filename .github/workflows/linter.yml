@@ -20,7 +20,8 @@ jobs:
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHON_BLACK_CONFIG_FILE: tox.ini
+          PYTHON_BLACK_CONFIG_FILE: "tox.ini"
           VALIDATE_DOCKERFILE: true
           VALIDATE_PYTHON_FLAKE8: true
+          VALIDATE_PYTHON_ISORT: true
           VALIDATE_YAML: true
