@@ -12,14 +12,23 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Change the values in `app.cfg` to point to your InfluxDB instance.
+The InfluxDB connection is configured via the environment variables `INFLUXDB_V2_URL`, `INFLUXDB_V2_TOKEN`, and `INFLUXDB_V2_ORG`. Other configuration parameters are documented in the [influxdb-client-python README](https://github.com/influxdata/influxdb-client-python#via-environment-properties).
+
+Use `INFLUXDB_BUCKET` to configure the bucket (`db0` by default) and `INFLUXDB_MEASUREMENT` to configure the measurement name (`feinstaub` by default).
 
 ## Development
 
 Launch the app locally in development mode:
 
 ```shell
+export INFLUXDB_V2_URL="https://localhost:8086"
+export INFLUXDB_V2_TOKEN="my-token"
+export INFLUXDB_V2_ORG="my-org"
+export INFLUXDB_V2_VERIFY_SSL="False"
+export INFLUXDB_BUCKET="my-bucket"
+export INFLUXDB_MEASUREMENT="feinstaub"
 FLASK_APP=app.py FLASK_ENV=development flask run --host=0.0.0.0 --cert=adhoc --port 5443
+
 ```
 
 ## Sample Payload

@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
+import os
+
+import aqi
 from flask import Flask, jsonify, request
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
-import aqi
-
 
 AQI_CATEGORIES = {
     (-1, 50): "Good",
@@ -15,16 +16,12 @@ AQI_CATEGORIES = {
     (300, 500): "Hazardous",
 }
 
+influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "db0")
+influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "feinstaub")
+
 app = Flask(__name__)
-app.config.from_pyfile("app.cfg")
 
-INFLUXDB_URL = "https://localhost:8086"
-INFLUXDB_TOKEN = "my-token"
-INFLUXDB_ORG = "my-org"
-INFLUXDB_BUCKET = "my-bucket"
-INFLUXDB_MEASUREMENT = "feinstaub"
-
-client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, verify_ssl=False)
+client = InfluxDBClient.from_env_properties()
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
@@ -43,7 +40,7 @@ def get_aqi_category(aqi_value):
 
 @app.route("/", methods=["GET"])
 def root():
-    return jsonify({"name": app.name})
+    return jsonify({"app_name": app.name, "influxdb_client": client.ready().status})
 
 
 @app.route("/upload_measurement", methods=["POST"])
@@ -65,7 +62,10 @@ def upload_measurement():
     data_points["AQI_category"] = get_aqi_category(aqi_value)
 
     app.logger.debug(f"Writing data: {data_points}")
-    write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, [{"measurement": INFLUXDB_MEASUREMENT, "tags": {"node": node_tag}, "fields": data_points}])
+    write_api.write(
+        bucket=influxdb_bucket,
+        record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
+    )
 
     return jsonify({"success": "true"})
 
