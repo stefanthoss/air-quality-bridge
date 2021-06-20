@@ -2,15 +2,16 @@ version: "3"
 
 services:
   air-quality-influxdb-bridge:
-    image: air-quality-influxdb-bridge:devel
+    image: ghcr.io/stefanthoss/air-quality-influxdb-bridge:master
+    container_name: air-quality-influxdb-bridge
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
       - INFLUXDB_V2_URL=https://localhost:8086
       - INFLUXDB_V2_TOKEN=my-token
       - INFLUXDB_V2_ORG=my-org
-      - INFLUXDB_V2_VERIFY_SSL=False
       - INFLUXDB_BUCKET=my-bucket
-      - INFLUXDB_MEASUREMENT=feinstaub
+      - INFLUXDB_MEASUREMENT=air_quality
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/info"]

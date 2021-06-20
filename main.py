@@ -16,8 +16,8 @@ AQI_CATEGORIES = {
     (300, 500): "Hazardous",
 }
 
-influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "db0")
-influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "feinstaub")
+influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "sensors")
+influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "air_quality")
 
 app = Flask(__name__)
 
