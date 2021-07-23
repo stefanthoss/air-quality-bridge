@@ -52,8 +52,8 @@ def upload_measurement():
     node_tag = "unknown"
     if "esp8266id" in data:
         node_tag = f"esp8266-{data['esp8266id']}"
-    elif "rpiid" in data:
-        node_tag = f"rpi-{data['rpiid']}"
+    elif "raspiid" in data:
+        node_tag = f"raspi-{data['raspiid']}"
 
     aqi_value = float(
         aqi.to_aqi([(aqi.POLLUTANT_PM10, data_points["SDS_P1"]), (aqi.POLLUTANT_PM25, data_points["SDS_P2"])])
