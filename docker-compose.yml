@@ -2,7 +2,7 @@ version: "3"
 
 services:
   air-quality-influxdb-bridge:
-    image: ghcr.io/stefanthoss/air-quality-influxdb-bridge:master
+    image: ghcr.io/stefanthoss/air-quality-influxdb-bridge:latest
     container_name: air-quality-influxdb-bridge
     restart: unless-stopped
     ports:
