@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl=7.74.0-1.3+deb11u1 \
     && rm -rf /var/lib/apt/lists/*
 
