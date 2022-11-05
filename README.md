@@ -1,4 +1,4 @@
-# Air Quality -> InfluxDB Bridge
+# Air Quality Bridge
 
 This Flask-based server accepts particulate matter/temperature/humidity data from a [sensor.community sensor](https://sensor.community/en/sensors/airrohr) and writes it to a InfluxDB 2.0 server. It also calculates the Air Quality Index (AQI) with [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi).
 
@@ -34,12 +34,12 @@ If everything is configured correctly, executing `curl -X GET http://localhost:5
 If you want to build the Docker image locally, execute:
 
 ```shell
-docker build -t air-quality-influxdb-bridge:devel .
+docker build -t air-quality-bridge:devel .
 ```
 
 ## Deployment
 
-The Docker image from the repository gets automatically build and published to the GitHub Container Registry as [ghcr.io/stefanthoss/air-quality-influxdb-bridge](https://github.com/stefanthoss/air-quality-influxdb-bridge/pkgs/container/air-quality-influxdb-bridge).
+The Docker image from the repository gets automatically build and published to the GitHub Container Registry as [ghcr.io/stefanthoss/air-quality-bridge](https://github.com/stefanthoss/air-quality-bridge/pkgs/container/air-quality-bridge).
 
 The best way to deploy the application is with Docker Compose. Download the `docker-compose.yml` file, change the environment variables according to your local setup, and start the Docker service with `docker-compose up`:
 
