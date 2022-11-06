@@ -26,11 +26,9 @@ app = Flask(__name__)
 influxdb_client = InfluxDBClient.from_env_properties()
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
-mqtt = Mqtt(app)
 app.config["MQTT_CLIENT_ID"] = "air-quality-bridge"
 app.config["MQTT_REFRESH_TIME"] = 5
-app.config["MQTT_CLEAN_SESSION"] = True
-mqtt_prefix = "homeassistant"
+mqtt = Mqtt(app)
 
 
 def register_mqtt_sensor(device_name, sensor_name, sensor_sw_version):
@@ -66,18 +64,18 @@ def register_mqtt_sensor(device_name, sensor_name, sensor_sw_version):
         sensor_name_readable = "AQI Category"
 
     ha_sensor_config = {
-        "availability": {"topic": f"air-quality/{device_name}/status"},
+        "availability_topic": f"air-quality/{device_name}/status",
         "device": {"identifiers": device_name, "sw_version": sensor_sw_version, "via_device": "air-quality-bridge"},
         "device_class": ha_device_class,
         "name": sensor_name_readable,
         "state_class": "measurement",
         "state_topic": f"air-quality/{device_name}/state",
         "unique_id": f"{device_name}-{sensor_name}",
-        "value_template": f"{{ value_json.{sensor_name}}}",
+        "value_template": f"{{{{ value_json.{sensor_name} }}}}",
     }
 
     # Publish configuration
-    mqtt.publish(f"{mqtt_prefix}/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
+    mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
 
 
 def publish_mqtt_values(device_name, sensor_dict):
@@ -139,9 +137,11 @@ def upload_measurement():
         record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
     )
 
-    # TODO: Implement
-    # for sensor_name in data_points:
-    #     register_mqtt_sensor(node_tag, sensor_name, data["software_version"])
+    # Publish HA sensor data to MQTT
+    for sensor_name in data_points:
+        register_mqtt_sensor(node_tag, sensor_name, data["software_version"])
+    mqtt.publish(f"air-quality/{node_tag}/status", "online")
+    mqtt.publish(f"air-quality/{node_tag}/state", json.dumps(data_points))
 
     return jsonify({"success": "true"})
 
