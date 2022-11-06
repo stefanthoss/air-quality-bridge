@@ -96,6 +96,8 @@ From the sensor firmware version `NRZ-2020-129`:
 }
 ```
 
+Use `curl -X POST -H "Content-Type: application/json" -d @test/measurement.json http://127.0.0.1:5000/upload_measurement` to use this test file locally.
+
 ## Sensor Configuration
 
 In the *Configuration* section of your air quality sensor:
