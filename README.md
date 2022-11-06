@@ -37,6 +37,8 @@ If you want to build the Docker image locally, execute:
 docker build -t air-quality-bridge:devel .
 ```
 
+Add the environment variable `FLASK_ENV=development` for further debugging.
+
 ## Deployment
 
 The Docker image from the repository gets automatically build and published to the GitHub Container Registry as [ghcr.io/stefanthoss/air-quality-bridge](https://github.com/stefanthoss/air-quality-bridge/pkgs/container/air-quality-bridge).

@@ -1,3 +1,4 @@
+Flask-MQTT~=1.1.1
 Flask~=2.2.2
 influxdb-client~=1.31.0
 python-aqi~=0.6.1
