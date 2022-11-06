@@ -9,4 +9,6 @@ RUN pip install --no-cache-dir -r /app/requirements.txt --upgrade pip
 
 COPY main.py /app/
 
+EXPOSE 5000
+
 CMD ["python", "/app/main.py"]
