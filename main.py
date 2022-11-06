@@ -63,20 +63,14 @@ def register_mqtt_sensor(device_name, sensor_name, sensor_sw_version):
         sensor_name_readable = "AQI Category"
 
     ha_sensor_config = {
-        "availability": {
-            "topic": f"air-quality/{device_name}/status"
-        },
-        "device": {
-            "identifiers": device_name,
-            "sw_version": sensor_sw_version,
-            "via_device": "air-quality-bridge"
-        },
+        "availability": {"topic": f"air-quality/{device_name}/status"},
+        "device": {"identifiers": device_name, "sw_version": sensor_sw_version, "via_device": "air-quality-bridge"},
         "device_class": ha_device_class,
         "name": sensor_name_readable,
         "state_class": "measurement",
         "state_topic": f"air-quality/{device_name}/state",
         "unique_id": f"{device_name}-{sensor_name}",
-        "value_template": f"{{ value_json.{sensor_name}}}"
+        "value_template": f"{{ value_json.{sensor_name}}}",
     }
 
     # Publish configuration
