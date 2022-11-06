@@ -27,6 +27,9 @@ influxdb_client = InfluxDBClient.from_env_properties()
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 mqtt = Mqtt(app)
+app.config["MQTT_CLIENT_ID"] = "air-quality-bridge"
+app.config["MQTT_REFRESH_TIME"] = 5
+app.config["MQTT_CLEAN_SESSION"] = True
 mqtt_prefix = "homeassistant"
 
 
@@ -144,4 +147,4 @@ def upload_measurement():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(host="0.0.0.0", port=5000, use_reloader=False)
