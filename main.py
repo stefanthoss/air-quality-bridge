@@ -31,9 +31,10 @@ app.config["MQTT_REFRESH_TIME"] = 5
 mqtt = Mqtt(app)
 
 
-def register_mqtt_sensor(device_name, sensor_name, sensor_sw_version):
-    ha_device_class = "None"
+def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
+    ha_device_class = None
     sensor_name_readable = sensor_name
+    enabled_by_default = "true"
 
     if sensor_name.endswith("P0"):
         ha_device_class = "pm1"
@@ -60,29 +61,25 @@ def register_mqtt_sensor(device_name, sensor_name, sensor_sw_version):
         ha_device_class = "aqi"
         sensor_name_readable = "AQI"
     elif sensor_name == "AQI_category":
-        ha_device_class = "None"
         sensor_name_readable = "AQI Category"
+    else:
+        enabled_by_default = "false"
 
     ha_sensor_config = {
-        "availability_topic": f"air-quality/{device_name}/status",
-        "device": {"identifiers": device_name, "sw_version": sensor_sw_version, "via_device": "air-quality-bridge"},
-        "device_class": ha_device_class,
-        "name": sensor_name_readable,
+        "availability_topic": f"homeassistant/sensor/{device_name}/status",
+        "device": device_info_dict,
+        "enabled_by_default": enabled_by_default,
+        "name": f"{device_name} {sensor_name_readable}",
         "state_class": "measurement",
-        "state_topic": f"air-quality/{device_name}/state",
-        "unique_id": f"{device_name}-{sensor_name}",
+        "state_topic": f"homeassistant/sensor/{device_name}/state",
+        "unique_id": f"{device_name}_{sensor_name}",
         "value_template": f"{{{{ value_json.{sensor_name} }}}}",
     }
+    if ha_device_class is not None:
+        ha_sensor_config["device_class"] = ha_device_class
 
     # Publish configuration
     mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
-
-
-def publish_mqtt_values(device_name, sensor_dict):
-    # Make sensor available
-    mqtt.publish(f"air-quality/{device_name}/status", "online")
-
-    # TODO: Implement
 
 
 def transform_data(data):
@@ -137,11 +134,20 @@ def upload_measurement():
         record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
     )
 
+    ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    device_info_dict = {
+        "configuration_url": f"http://{ip_addr}",
+        "identifiers": node_tag,
+        "name": "Air Sensor",
+        "sw_version": data["software_version"],
+        "via_device": "air-quality-bridge"
+    }
+
     # Publish HA sensor data to MQTT
     for sensor_name in data_points:
-        register_mqtt_sensor(node_tag, sensor_name, data["software_version"])
-    mqtt.publish(f"air-quality/{node_tag}/status", "online")
-    mqtt.publish(f"air-quality/{node_tag}/state", json.dumps(data_points))
+        register_mqtt_sensor(node_tag, sensor_name, device_info_dict)
+    mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
+    mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
 
     return jsonify({"success": "true"})
 
