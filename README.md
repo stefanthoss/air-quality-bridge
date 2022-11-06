@@ -37,7 +37,7 @@ If you want to build the Docker image locally, execute:
 docker build -t air-quality-bridge:devel .
 ```
 
-Add the environment variable `FLASK_ENV=development` for further debugging.
+Add the environment variable `FLASK_DEBUG=1` for further debugging.
 
 ## Deployment
 
