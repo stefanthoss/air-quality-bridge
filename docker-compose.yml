@@ -5,6 +5,7 @@ services:
     image: ghcr.io/stefanthoss/air-quality-bridge:latest
     container_name: air-quality-bridge
     restart: unless-stopped
+    stop_signal: SIGINT
     ports:
       - "5000:5000"
     environment:
