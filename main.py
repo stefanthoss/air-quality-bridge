@@ -18,6 +18,8 @@ AQI_CATEGORIES = {
     (300, 500): "Hazardous",
 }
 
+online_mqtt_sensors = {}
+
 influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "sensors")
 influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "air_quality")
 
@@ -153,8 +155,17 @@ def upload_measurement():
     mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
     mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
 
+    online_mqtt_sensors[node_tag] = f"homeassistant/sensor/{node_tag}/status"
+    app.logger.debug(f"Online MQTT Sensors: {online_mqtt_sensors}")
+
     return jsonify({"success": "true"})
+
+
+def mark_mqtt_offline():
+    app.logger.info("Shutting down...")
+    # TODO implement
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, use_reloader=False)
+    app.teardown_appcontext(mark_mqtt_offline)
