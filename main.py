@@ -142,7 +142,8 @@ def upload_measurement():
     device_info_dict = {
         "configuration_url": f"http://{ip_addr}",
         "identifiers": node_tag,
-        "name": "Air Sensor",
+        "manufacturer": "Sensor.Community"
+        "name": f"Air Sensor {node_tag}",
         "sw_version": data["software_version"],
         "via_device": "air-quality-bridge",
     }
