@@ -26,8 +26,12 @@ app = Flask(__name__)
 influxdb_client = InfluxDBClient.from_env_properties()
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
-app.config["MQTT_CLIENT_ID"] = "air-quality-bridge"
-app.config["MQTT_REFRESH_TIME"] = 5
+app.config["MQTT_BROKER_URL"] = os.environ.get("MQTT_BROKER_URL")
+app.config["MQTT_BROKER_PORT"] = os.environ.get("MQTT_BROKER_PORT", 1883)
+app.config["MQTT_USERNAME"] = os.environ.get("MQTT_USERNAME")
+app.config["MQTT_PASSWORD"] = os.environ.get("MQTT_PASSWORD")
+app.config["MQTT_CLIENT_ID"] = os.environ.get("MQTT_CLIENT_ID", "air-quality-bridge")
+app.config["MQTT_REFRESH_TIME"] = os.environ.get("MQTT_REFRESH_TIME", 5)
 mqtt = Mqtt(app)
 
 
@@ -134,13 +138,13 @@ def upload_measurement():
         record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
     )
 
-    ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    ip_addr = request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr)
     device_info_dict = {
         "configuration_url": f"http://{ip_addr}",
         "identifiers": node_tag,
         "name": "Air Sensor",
         "sw_version": data["software_version"],
-        "via_device": "air-quality-bridge"
+        "via_device": "air-quality-bridge",
     }
 
     # Publish HA sensor data to MQTT
