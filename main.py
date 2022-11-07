@@ -27,7 +27,7 @@ influxdb_client = InfluxDBClient.from_env_properties()
 write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
 
 app.config["MQTT_BROKER_URL"] = os.environ.get("MQTT_BROKER_URL")
-app.config["MQTT_BROKER_PORT"] = os.environ.get("MQTT_BROKER_PORT", 1883)
+app.config["MQTT_BROKER_PORT"] = int(os.environ.get("MQTT_BROKER_PORT", 1883))
 app.config["MQTT_USERNAME"] = os.environ.get("MQTT_USERNAME")
 app.config["MQTT_PASSWORD"] = os.environ.get("MQTT_PASSWORD")
 app.config["MQTT_CLIENT_ID"] = os.environ.get("MQTT_CLIENT_ID", "air-quality-bridge")
