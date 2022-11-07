@@ -38,7 +38,7 @@ mqtt = Mqtt(app)
 
 
 def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
-    device_class = None
+    device_class = None  # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
     sensor_name_readable = sensor_name
     unit_of_measurement = None
     enabled_by_default = "true"
@@ -66,7 +66,7 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
     elif sensor_name.endswith("pressure"):
         device_class = "pressure"
         sensor_name_readable = "Pressure"
-        unit_of_measurement = "hPa"
+        unit_of_measurement = "Pa"
     elif sensor_name.endswith("lux"):
         device_class = "illuminance"
         sensor_name_readable = "Light"
