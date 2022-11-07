@@ -2,6 +2,7 @@
 
 import json
 import os
+import signal
 
 import aqi
 from flask import Flask, jsonify, request
@@ -156,16 +157,17 @@ def upload_measurement():
     mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
 
     online_mqtt_sensors[node_tag] = f"homeassistant/sensor/{node_tag}/status"
-    app.logger.debug(f"Online MQTT Sensors: {online_mqtt_sensors}")
+    app.logger.debug(f"Currently online MQTT Sensors: {online_mqtt_sensors}")
 
     return jsonify({"success": "true"})
 
 
-def mark_mqtt_offline():
+def terminate_app(signalNumber, frame):
     app.logger.info("Shutting down...")
     # TODO implement
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, use_reloader=False)
-    app.teardown_appcontext(mark_mqtt_offline)
+
+    signal.signal(signal.SIGINT, terminate_app)
