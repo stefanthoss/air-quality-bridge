@@ -1,6 +1,6 @@
 # Air Quality Bridge
 
-This Flask-based server accepts particulate matter/temperature/humidity data from a [sensor.community sensor](https://sensor.community/en/sensors/airrohr) and writes it to a InfluxDB 2.0 server. It also calculates the Air Quality Index (AQI) with [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi).
+This Flask-based server accepts air quality/temperature/humidity data from a [sensor.community sensor](https://sensor.community/en/sensors/airrohr) and forwards it to an InfluxDB 2.0 server or a Home Assistant instance via an MQTT broker. It also calculates the Air Quality Index (AQI) with [hrbonz/python-aqi](https://github.com/hrbonz/python-aqi).
 
 ## Requirements
 
@@ -10,11 +10,24 @@ This project uses Python 3. Install the required dependencies with
 pip install -r requirements.txt
 ```
 
-## Configuration
+## InfluxDB Configuration
 
-The InfluxDB connection is configured via the environment variables `INFLUXDB_V2_URL`, `INFLUXDB_V2_TOKEN`, and `INFLUXDB_V2_ORG`. Other configuration parameters for InfluxDB are documented in the [influxdb-client-python README](https://github.com/influxdata/influxdb-client-python#via-environment-properties).
+The InfluxDB connection is configured via the environment variables `INFLUXDB_V2_URL`, `INFLUXDB_V2_TOKEN`, and `INFLUXDB_V2_ORG`. Other configuration parameters for InfluxDB are documented in the [influxdb-client-python README](https://github.com/influxdata/influxdb-client-python#via-environment-properties). Use `INFLUXDB_BUCKET` to configure the bucket (default: `sensors`) and `INFLUXDB_MEASUREMENT` to configure the measurement name (default: `air_quality`).
 
-Use `INFLUXDB_BUCKET` to configure the bucket (default: `sensors`) and `INFLUXDB_MEASUREMENT` to configure the measurement name (default: `air_quality`).
+## Home Assistant / MQTT Integration
+
+The MQTT broker is configured via the environment variables `MQTT_BROKER_URL`, `MQTT_BROKER_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD`, and `MQTT_CLIENT_ID`. Other configuration parameters for MQTT are documented in the [flask-mqtt README](https://flask-mqtt.readthedocs.io/en/latest/configuration.html#configuration-keys).
+
+Add the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) to Home Assistant and enable *Enable newly added entities* in the integration's system options. Once the Air Quality Bridge is configured correctly, the air sensor's devices and entities will be created and updated automatically through the MQTT's auto discovery feature.
+
+## Sensor Configuration
+
+In the *Configuration* section of your air quality sensor:
+
+* Set *Server* to the IP of your deployment.
+* Activate *Send data to custom API* and *HTTPS*.
+* Set */path* to `/upload_measurement`.
+* Set *Port* to 5443.
 
 ## Development
 
@@ -26,6 +39,10 @@ export INFLUXDB_V2_TOKEN="my-token"
 export INFLUXDB_V2_ORG="my-org"
 export INFLUXDB_BUCKET="my-bucket"
 export INFLUXDB_MEASUREMENT="air_quality"
+export MQTT_BROKER_URL="my-mqtt-broker"
+export MQTT_BROKER_PORT=1883
+export MQTT_USERNAME="air-quality"
+export MQTT_PASSWORD="my-password"
 python main.py
 ```
 
@@ -97,12 +114,3 @@ From the sensor firmware version `NRZ-2020-129`:
 ```
 
 Use `curl -X POST -H "Content-Type: application/json" -d @test/measurement.json http://127.0.0.1:5000/upload_measurement` to use this test file locally.
-
-## Sensor Configuration
-
-In the *Configuration* section of your air quality sensor:
-
-* Set *Server* to the IP of your deployment.
-* Activate *Send data to custom API* and *HTTPS*.
-* Set */path* to `/upload_measurement`.
-* Set *Port* to 5443.
