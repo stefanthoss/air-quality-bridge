@@ -21,20 +21,31 @@ AQI_CATEGORIES = {
 
 online_mqtt_sensors = {}
 
-influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "sensors")
-influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "air_quality")
-
 app = Flask(__name__)
 
-influxdb_client = InfluxDBClient.from_env_properties()
-write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
+ENABLE_INFLUXDB = (os.environ.get("ENABLE_INFLUXDB", "false").lower() == "true")
+app.logger.info(f"InfluxDB enabled: {ENABLE_INFLUXDB}")
+ENABLE_MQTT = (os.environ.get("ENABLE_MQTT", "false").lower() == "true")
+app.logger.info(f"MQTT enabled: {ENABLE_MQTT}")
 
-app.config["MQTT_BROKER_URL"] = os.environ.get("MQTT_BROKER_URL")
-app.config["MQTT_BROKER_PORT"] = int(os.environ.get("MQTT_BROKER_PORT", 1883))
-app.config["MQTT_USERNAME"] = os.environ.get("MQTT_USERNAME")
-app.config["MQTT_PASSWORD"] = os.environ.get("MQTT_PASSWORD")
-app.config["MQTT_CLIENT_ID"] = os.environ.get("MQTT_CLIENT_ID", "air-quality-bridge")
-mqtt = Mqtt(app)
+if not ENABLE_INFLUXDB and not ENABLE_MQTT:
+    app.logger.warning("No data destination configured, the bridge will not forward incoming data.")
+
+if ENABLE_INFLUXDB:
+    app.logger.info("Creating InfluxDB connection...")
+    influxdb_client = InfluxDBClient.from_env_properties()
+    write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
+    influxdb_bucket = os.environ.get("INFLUXDB_BUCKET", "sensors")
+    influxdb_measurement = os.environ.get("INFLUXDB_MEASUREMENT", "air_quality")
+
+if ENABLE_MQTT:
+    app.logger.info("Creating MQTT connection...")
+    app.config["MQTT_BROKER_URL"] = os.environ.get("MQTT_BROKER_URL")
+    app.config["MQTT_BROKER_PORT"] = int(os.environ.get("MQTT_BROKER_PORT", 1883))
+    app.config["MQTT_USERNAME"] = os.environ.get("MQTT_USERNAME")
+    app.config["MQTT_PASSWORD"] = os.environ.get("MQTT_PASSWORD")
+    app.config["MQTT_CLIENT_ID"] = os.environ.get("MQTT_CLIENT_ID", "air-quality-bridge")
+    mqtt = Mqtt(app)
 
 
 def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
@@ -120,7 +131,7 @@ def root():
 @app.route("/upload_measurement", methods=["POST"])
 def upload_measurement():
     data = request.json
-    app.logger.debug(f"Received data: {data}")
+    app.logger.debug(f"Received data from sensor: {data}")
     data_points = transform_data(data["sensordatavalues"])
 
     node_tag = "unknown"
@@ -139,36 +150,42 @@ def upload_measurement():
             aqi.to_aqi([(aqi.POLLUTANT_PM10, data_points["PMS_P1"]), (aqi.POLLUTANT_PM25, data_points["PMS_P2"])])
         )
     else:
-        app.logger.warn("Measurement for {node_tag} does not contain pollutant data.")
+        app.logger.warn("Measurement for {node_tag} does not contain air pollutant data.")
 
     if aqi_value is not None:
         data_points["AQI_value"] = aqi_value
         data_points["AQI_category"] = get_aqi_category(aqi_value)
 
-    app.logger.debug(f"Writing data: {data_points}")
-    write_api.write(
-        bucket=influxdb_bucket,
-        record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
-    )
+    app.logger.debug(f"Parsed and transformed data: {data_points}")
 
-    ip_addr = request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr)
-    device_info_dict = {
-        "configuration_url": f"http://{ip_addr}",
-        "identifiers": node_tag,
-        "manufacturer": "Sensor.Community",
-        "name": f"Air Sensor {node_tag}",
-        "sw_version": data["software_version"],
-        "via_device": "air-quality-bridge",
-    }
+    if ENABLE_INFLUXDB:
+        app.logger.debug("Writing data to InfluxDB...")
+        write_api.write(
+            bucket=influxdb_bucket,
+            record=[{"measurement": influxdb_measurement, "tags": {"node": node_tag}, "fields": data_points}],
+        )
 
-    # Publish HA sensor data to MQTT
-    for sensor_name in data_points:
-        register_mqtt_sensor(node_tag, sensor_name, device_info_dict)
-    mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
-    mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
+    if ENABLE_MQTT:
+        app.logger.debug("Writing data to MQTT...")
 
-    online_mqtt_sensors[node_tag] = f"homeassistant/sensor/{node_tag}/status"
-    app.logger.debug(f"Currently online MQTT Sensors: {online_mqtt_sensors}")
+        ip_addr = request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr)
+        device_info_dict = {
+            "configuration_url": f"http://{ip_addr}",
+            "identifiers": node_tag,
+            "manufacturer": "Sensor.Community",
+            "name": f"Air Sensor {node_tag}",
+            "sw_version": data["software_version"],
+            "via_device": "air-quality-bridge",
+        }
+
+        # Publish HA sensor data to MQTT
+        for sensor_name in data_points:
+            register_mqtt_sensor(node_tag, sensor_name, device_info_dict)
+        mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
+        mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
+
+        online_mqtt_sensors[node_tag] = f"homeassistant/sensor/{node_tag}/status"
+        app.logger.debug(f"Currently online MQTT sensors: {online_mqtt_sensors}")
 
     return jsonify({"success": "true"})
 
