@@ -31,7 +31,6 @@ app.config["MQTT_BROKER_PORT"] = int(os.environ.get("MQTT_BROKER_PORT", 1883))
 app.config["MQTT_USERNAME"] = os.environ.get("MQTT_USERNAME")
 app.config["MQTT_PASSWORD"] = os.environ.get("MQTT_PASSWORD")
 app.config["MQTT_CLIENT_ID"] = os.environ.get("MQTT_CLIENT_ID", "air-quality-bridge")
-app.config["MQTT_REFRESH_TIME"] = os.environ.get("MQTT_REFRESH_TIME", 5)
 mqtt = Mqtt(app)
 
 
