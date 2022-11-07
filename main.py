@@ -38,33 +38,41 @@ mqtt = Mqtt(app)
 
 
 def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
-    ha_device_class = None
+    device_class = None
     sensor_name_readable = sensor_name
+    unit_of_measurement = None
     enabled_by_default = "true"
 
     if sensor_name.endswith("P0"):
-        ha_device_class = "pm1"
+        device_class = "pm1"
         sensor_name_readable = "PM 1"
+        unit_of_measurement = "µg/m³"
     elif sensor_name.endswith("P1"):
-        ha_device_class = "pm10"
+        device_class = "pm10"
         sensor_name_readable = "PM 10"
+        unit_of_measurement = "µg/m³"
     elif sensor_name.endswith("P2"):
-        ha_device_class = "pm25"
+        device_class = "pm25"
         sensor_name_readable = "PM 2.5"
+        unit_of_measurement = "µg/m³"
     elif sensor_name.endswith("temperature"):
-        ha_device_class = "temperature"
+        device_class = "temperature"
         sensor_name_readable = "Temperature"
+        unit_of_measurement = "°C"
     elif sensor_name.endswith("humidity"):
-        ha_device_class = "humidity"
+        device_class = "humidity"
         sensor_name_readable = "Humidity"
+        unit_of_measurement = "%"
     elif sensor_name.endswith("pressure"):
-        ha_device_class = "pressure"
+        device_class = "pressure"
         sensor_name_readable = "Pressure"
+        unit_of_measurement = "hPa"
     elif sensor_name.endswith("lux"):
-        ha_device_class = "illuminance"
+        device_class = "illuminance"
         sensor_name_readable = "Light"
+        unit_of_measurement = "lx"
     elif sensor_name == "AQI_value":
-        ha_device_class = "aqi"
+        device_class = "aqi"
         sensor_name_readable = "AQI"
     elif sensor_name == "AQI_category":
         sensor_name_readable = "AQI Category"
@@ -81,8 +89,10 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
         "unique_id": f"{device_name}_{sensor_name}",
         "value_template": f"{{{{ value_json.{sensor_name} }}}}",
     }
-    if ha_device_class is not None:
-        ha_sensor_config["device_class"] = ha_device_class
+    if device_class is not None:
+        ha_sensor_config["device_class"] = device_class
+    if unit_of_measurement is not None:
+        ha_sensor_config["unit_of_measurement"] = unit_of_measurement
 
     # Publish configuration
     mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
