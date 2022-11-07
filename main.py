@@ -120,17 +120,17 @@ def upload_measurement():
 
     aqi_value = None
     if "SDS_P1" in data_points and "SDS_P2" in data_points:
-        aqi_value = float(
+        aqi_value = int(
             aqi.to_aqi([(aqi.POLLUTANT_PM10, data_points["SDS_P1"]), (aqi.POLLUTANT_PM25, data_points["SDS_P2"])])
         )
     elif "PMS_P1" in data_points and "PMS_P2" in data_points:
-        aqi_value = float(
+        aqi_value = int(
             aqi.to_aqi([(aqi.POLLUTANT_PM10, data_points["PMS_P1"]), (aqi.POLLUTANT_PM25, data_points["PMS_P2"])])
         )
     else:
         app.logger.warn("Measurement for {node_tag} does not contain pollutant data.")
 
-    if aqi_value:
+    if aqi_value is not None:
         data_points["AQI_value"] = aqi_value
         data_points["AQI_category"] = get_aqi_category(aqi_value)
 
