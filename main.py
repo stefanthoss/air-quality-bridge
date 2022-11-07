@@ -95,6 +95,7 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
         ha_sensor_config["unit_of_measurement"] = unit_of_measurement
 
     # Publish configuration
+    app.logger.debug(f"Configuring MQTT sensor: {ha_sensor_config}")
     mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
 
 
