@@ -23,9 +23,9 @@ online_mqtt_sensors = {}
 
 app = Flask(__name__)
 
-ENABLE_INFLUXDB = (os.environ.get("ENABLE_INFLUXDB", "false").lower() == "true")
+ENABLE_INFLUXDB = os.environ.get("ENABLE_INFLUXDB", "false").lower() == "true"
 app.logger.info(f"InfluxDB enabled: {ENABLE_INFLUXDB}")
-ENABLE_MQTT = (os.environ.get("ENABLE_MQTT", "false").lower() == "true")
+ENABLE_MQTT = os.environ.get("ENABLE_MQTT", "false").lower() == "true"
 app.logger.info(f"MQTT enabled: {ENABLE_MQTT}")
 
 if not ENABLE_INFLUXDB and not ENABLE_MQTT:
@@ -124,8 +124,11 @@ def get_aqi_category(aqi_value):
 
 
 @app.route("/info", methods=["GET"])
-def root():
-    return jsonify({"app_name": app.name, "influxdb_client": influxdb_client.ready().status})
+def info():
+    response = {"app_name": app.name}
+    if ENABLE_INFLUXDB:
+        response["influxdb_client"] = influxdb_client.ready().status
+    return jsonify({"app_name": app.name})
 
 
 @app.route("/upload_measurement", methods=["POST"])
