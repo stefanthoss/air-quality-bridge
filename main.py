@@ -194,7 +194,7 @@ def upload_measurement():
 
 
 @app.teardown_appcontext
-def terminate_app():
+def terminate_app(exc):
     app.logger.info("Shutting down...")
     if ENABLE_MQTT:
         for availability_topic in online_mqtt_sensors.values():
