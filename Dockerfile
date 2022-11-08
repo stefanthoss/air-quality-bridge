@@ -9,5 +9,4 @@ RUN pip install --no-cache-dir -r /app/requirements.txt --upgrade pip
 
 COPY main.py /app/
 
-ENTRYPOINT ["python"]
-CMD ["/app/main.py"]
+CMD ["python", "/app/main.py"]

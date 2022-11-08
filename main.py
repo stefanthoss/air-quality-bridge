@@ -2,13 +2,13 @@
 
 import json
 import os
-import signal
 
 import aqi
 from flask import Flask, jsonify, request
 from flask_mqtt import Mqtt
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
+from waitress import serve
 
 AQI_CATEGORIES = {
     (-1, 50): "Good",
@@ -193,12 +193,13 @@ def upload_measurement():
     return jsonify({"success": "true"})
 
 
-def terminate_app(signalNumber, frame):
+@app.teardown_appcontext
+def terminate_app():
     app.logger.info("Shutting down...")
-    # TODO implement
+    if ENABLE_MQTT:
+        for availability_topic in online_mqtt_sensors.values():
+            mqtt.publish(availability_topic, "offline")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, use_reloader=False)
-
-    signal.signal(signal.SIGINT, terminate_app)
+    serve(app, host="0.0.0.0", port=5000)
