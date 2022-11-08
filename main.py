@@ -2,6 +2,7 @@
 
 import json
 import os
+import signal
 
 import aqi
 from flask import Flask, jsonify, request
@@ -193,8 +194,7 @@ def upload_measurement():
     return jsonify({"success": "true"})
 
 
-@app.teardown_appcontext
-def terminate_app(exc):
+def terminate_app(signalNumber, frame):
     app.logger.info("Shutting down...")
     if ENABLE_MQTT:
         for availability_topic in online_mqtt_sensors.values():
@@ -203,3 +203,5 @@ def terminate_app(exc):
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
+
+    signal.signal(signal.SIGINT, terminate_app)
