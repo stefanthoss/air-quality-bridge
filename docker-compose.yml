@@ -9,11 +9,13 @@ services:
     ports:
       - "5000:5000"
     environment:
+      - ENABLE_INFLUXDB=false
       - INFLUXDB_V2_URL=https://localhost:8086
       - INFLUXDB_V2_TOKEN=my-token
       - INFLUXDB_V2_ORG=my-org
       - INFLUXDB_BUCKET=my-bucket
       - INFLUXDB_MEASUREMENT=air_quality
+      - ENABLE_MQTT=false
       - MQTT_BROKER_URL=my-mqtt-broker
       - MQTT_BROKER_PORT=1883
       - MQTT_USERNAME=air-quality
