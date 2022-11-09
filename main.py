@@ -2,7 +2,6 @@
 
 import json
 import os
-import signal
 
 import aqi
 from flask import Flask, jsonify, request
@@ -20,14 +19,12 @@ AQI_CATEGORIES = {
     (300, 500): "Hazardous",
 }
 
-online_mqtt_sensors = {}
-
 app = Flask(__name__)
 
 ENABLE_INFLUXDB = os.environ.get("ENABLE_INFLUXDB", "false").lower() == "true"
-app.logger.info(f"InfluxDB enabled: {ENABLE_INFLUXDB}")
+app.logger.debug(f"InfluxDB enabled: {ENABLE_INFLUXDB}")
 ENABLE_MQTT = os.environ.get("ENABLE_MQTT", "false").lower() == "true"
-app.logger.info(f"MQTT enabled: {ENABLE_MQTT}")
+app.logger.debug(f"MQTT enabled: {ENABLE_MQTT}")
 
 if not ENABLE_INFLUXDB and not ENABLE_MQTT:
     app.logger.warning("No data destination configured, the bridge will not forward incoming data.")
@@ -188,20 +185,8 @@ def upload_measurement():
         mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
         mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
 
-        online_mqtt_sensors[node_tag] = f"homeassistant/sensor/{node_tag}/status"
-        app.logger.debug(f"Currently online MQTT sensors: {online_mqtt_sensors}")
-
     return jsonify({"success": "true"})
-
-
-def terminate_app(signalNumber, frame):
-    app.logger.info("Shutting down...")
-    if ENABLE_MQTT:
-        for availability_topic in online_mqtt_sensors.values():
-            mqtt.publish(availability_topic, "offline")
 
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
-
-    signal.signal(signal.SIGINT, terminate_app)
