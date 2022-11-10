@@ -18,7 +18,7 @@ services:
       - ENABLE_MQTT=false
       - MQTT_BROKER_URL=my-mqtt-broker
       - MQTT_BROKER_PORT=1883
-      - MQTT_USERNAME=air-quality
+      - MQTT_USERNAME=my-username
       - MQTT_PASSWORD=my-password
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/info"]

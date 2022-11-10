@@ -126,7 +126,7 @@ def info():
     response = {"app_name": app.name}
     if ENABLE_INFLUXDB:
         response["influxdb_client"] = influxdb_client.ready().status
-    return jsonify({"app_name": app.name})
+    return jsonify(response)
 
 
 @app.route("/upload_measurement", methods=["POST"])

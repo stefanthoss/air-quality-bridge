@@ -18,9 +18,9 @@ Set `ENABLE_INFLUXDB=true` to enable writing data to InfluxDB. The InfluxDB conn
 
 ## Home Assistant / MQTT Integration
 
-Set `ENABLE_MQTT=true` to enable writing data to MQTT and providing the data as a sensor in Home Assistant. The MQTT broker is configured using the environment variables `MQTT_BROKER_URL`, `MQTT_BROKER_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD`, and `MQTT_CLIENT_ID`. Other configuration parameters for MQTT are documented in the [flask-mqtt README](https://flask-mqtt.readthedocs.io/en/latest/configuration.html#configuration-keys).
+Set `ENABLE_MQTT=true` to enable writing data to MQTT and exposing the data as a sensor in Home Assistant. The MQTT broker is configured using the environment variables `MQTT_BROKER_URL`, `MQTT_BROKER_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD`, and `MQTT_CLIENT_ID`. Other configuration parameters for MQTT are documented in the [flask-mqtt README](https://flask-mqtt.readthedocs.io/en/latest/configuration.html#configuration-keys).
 
-In Home Assistant, add the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) and enable *Enable newly added entities* in the integration's system options. Once the Air Quality Bridge is configured correctly and receives data, the air sensor's devices and entities will be created and updated automatically through the MQTT's auto discovery feature.
+In Home Assistant, add the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) and enable *Enable newly added entities* in the integration's system options. Once the Air Quality Bridge is running and receives data, it will publish data to MQTT which Home Assistant will use to create devices and entities for the air quality sensor through MQTT's auto discovery feature.
 
 ## Sensor Configuration
 
