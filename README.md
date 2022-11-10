@@ -42,19 +42,22 @@ pip install -r requirements.txt
 Launch the app locally in development mode and access it at <http://localhost:5000>:
 
 ```shell
+export ENABLE_INFLUXDB=true
 export INFLUXDB_V2_URL="https://localhost:8086"
 export INFLUXDB_V2_TOKEN="my-token"
 export INFLUXDB_V2_ORG="my-org"
 export INFLUXDB_BUCKET="my-bucket"
 export INFLUXDB_MEASUREMENT="air_quality"
-export MQTT_BROKER_URL="my-mqtt-broker"
+export ENABLE_INFLUXDB=true
+export MQTT_BROKER_URL="localhost"
 export MQTT_BROKER_PORT=1883
-export MQTT_USERNAME="air-quality"
+export MQTT_USERNAME="my-username"
 export MQTT_PASSWORD="my-password"
 python main.py
 ```
+Add the environment variable `FLASK_DEBUG=1` for further debugging.
 
-If everything is configured correctly, executing `curl -X GET http://localhost:5000/info` should return a JSON object that indicates the InfluxDB client is ready.
+If everything is configured correctly, executing `curl -X GET http://localhost:5000/info` should return a JSON object that indicates the application is ready. This endpoint is also used for the Docker health check.
 
 If you want to build the Docker image locally, execute:
 
@@ -62,7 +65,6 @@ If you want to build the Docker image locally, execute:
 docker build -t air-quality-bridge:devel .
 ```
 
-Add the environment variable `FLASK_DEBUG=1` for further debugging.
 
 ## Sample Sensor Payload
 
