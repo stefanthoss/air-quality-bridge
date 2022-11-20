@@ -105,7 +105,7 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
 
     # Publish configuration
     app.logger.debug(f"Configuring MQTT sensor: {ha_sensor_config}")
-    mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config))
+    mqtt.publish(f"homeassistant/sensor/{device_name}/{sensor_name}/config", json.dumps(ha_sensor_config), retain=True)
 
 
 def transform_data(data):
@@ -183,7 +183,7 @@ def upload_measurement():
         for sensor_name in data_points:
             register_mqtt_sensor(node_tag, sensor_name, device_info_dict)
         mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
-        mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points))
+        mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points), retain=True)
 
     return jsonify({"success": "true"})
 
