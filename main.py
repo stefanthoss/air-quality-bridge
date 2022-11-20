@@ -182,7 +182,7 @@ def upload_measurement():
         # Publish HA sensor data to MQTT
         for sensor_name in data_points:
             register_mqtt_sensor(node_tag, sensor_name, device_info_dict)
-        mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online")
+        mqtt.publish(f"homeassistant/sensor/{node_tag}/status", "online", retain=True)
         mqtt.publish(f"homeassistant/sensor/{node_tag}/state", json.dumps(data_points), retain=True)
 
     return jsonify({"success": "true"})
