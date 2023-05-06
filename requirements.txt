@@ -1,5 +1,5 @@
 Flask-MQTT~=1.1.1
-Flask~=2.2.3
+Flask~=2.3.2
 influxdb-client~=1.36.1
 python-aqi~=0.6.1
 waitress~=2.1.2
