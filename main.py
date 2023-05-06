@@ -50,6 +50,7 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
     device_class = None  # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
     sensor_name_readable = sensor_name
     unit_of_measurement = None
+    state_class = "measurement"
     enabled_by_default = "true"
 
     if sensor_name.endswith("P0"):
@@ -85,6 +86,7 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
         sensor_name_readable = "AQI"
     elif sensor_name == "AQI_category":
         sensor_name_readable = "AQI Category"
+        state_class = None
     else:
         enabled_by_default = "false"
 
@@ -93,13 +95,14 @@ def register_mqtt_sensor(device_name, sensor_name, device_info_dict):
         "device": device_info_dict,
         "enabled_by_default": enabled_by_default,
         "name": f"{device_name} {sensor_name_readable}",
-        "state_class": "measurement",
         "state_topic": f"homeassistant/sensor/{device_name}/state",
         "unique_id": f"{device_name}_{sensor_name}",
         "value_template": f"{{{{ value_json.{sensor_name} }}}}",
     }
     if device_class is not None:
         ha_sensor_config["device_class"] = device_class
+    if state_class is not None:
+        ha_sensor_config["state_class"] = state_class
     if unit_of_measurement is not None:
         ha_sensor_config["unit_of_measurement"] = unit_of_measurement
 
